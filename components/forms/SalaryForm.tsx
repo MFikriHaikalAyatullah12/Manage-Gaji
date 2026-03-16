@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { FiX, FiSave, FiDollarSign, FiGift, FiMinus } from 'react-icons/fi'
+import { formatCurrencyInput, parseCurrencyInput } from '@/utils/formatRupiah'
 
 interface SalaryFormProps {
   onSubmit: (data: any) => Promise<void>
@@ -18,19 +19,24 @@ interface SalaryFormProps {
 export function SalaryForm({ onSubmit, onClose, initialData }: SalaryFormProps) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    gajiPokok: initialData?.gajiPokok || '',
-    tunjangan: initialData?.tunjangan || '',
-    bonus: initialData?.bonus || '',
-    potongan: initialData?.potongan || '',
+    gajiPokok: initialData?.gajiPokok ? formatCurrencyInput(initialData.gajiPokok) : '',
+    tunjangan: initialData?.tunjangan ? formatCurrencyInput(initialData.tunjangan) : '',
+    bonus: initialData?.bonus ? formatCurrencyInput(initialData.bonus) : '',
+    potongan: initialData?.potongan ? formatCurrencyInput(initialData.potongan) : '',
   })
 
-  // Calculate total
-  const total = (Number(formData.gajiPokok) || 0) + 
-                (Number(formData.tunjangan) || 0) + 
-                (Number(formData.bonus) || 0) - 
-                (Number(formData.potongan) || 0)
+  // Calculate total from formatted values
+  const total = parseCurrencyInput(formData.gajiPokok) + 
+                parseCurrencyInput(formData.tunjangan) + 
+                parseCurrencyInput(formData.bonus) - 
+                parseCurrencyInput(formData.potongan)
 
   const [error, setError] = useState<string | null>(null)
+
+  const handleFieldChange = (field: string, value: string) => {
+    const formatted = formatCurrencyInput(value)
+    setFormData({ ...formData, [field]: formatted })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,10 +44,10 @@ export function SalaryForm({ onSubmit, onClose, initialData }: SalaryFormProps) 
     setError(null)
     try {
       await onSubmit({
-        gajiPokok: Number(formData.gajiPokok),
-        tunjangan: formData.tunjangan ? Number(formData.tunjangan) : null,
-        bonus: formData.bonus ? Number(formData.bonus) : null,
-        potongan: formData.potongan ? Number(formData.potongan) : null,
+        gajiPokok: parseCurrencyInput(formData.gajiPokok),
+        tunjangan: formData.tunjangan ? parseCurrencyInput(formData.tunjangan) : null,
+        bonus: formData.bonus ? parseCurrencyInput(formData.bonus) : null,
+        potongan: formData.potongan ? parseCurrencyInput(formData.potongan) : null,
       })
       onClose()
     } catch (error: any) {
@@ -84,13 +90,13 @@ export function SalaryForm({ onSubmit, onClose, initialData }: SalaryFormProps) 
                 Gaji Pokok *
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={formData.gajiPokok}
-                onChange={(e) => setFormData({ ...formData, gajiPokok: e.target.value })}
+                onChange={(e) => handleFieldChange('gajiPokok', e.target.value)}
                 placeholder="0"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                 required
-                min="0"
               />
             </div>
             <div>
@@ -99,12 +105,12 @@ export function SalaryForm({ onSubmit, onClose, initialData }: SalaryFormProps) 
                 Tunjangan
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={formData.tunjangan}
-                onChange={(e) => setFormData({ ...formData, tunjangan: e.target.value })}
+                onChange={(e) => handleFieldChange('tunjangan', e.target.value)}
                 placeholder="0"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                min="0"
               />
             </div>
           </div>
@@ -117,12 +123,12 @@ export function SalaryForm({ onSubmit, onClose, initialData }: SalaryFormProps) 
                 Bonus
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={formData.bonus}
-                onChange={(e) => setFormData({ ...formData, bonus: e.target.value })}
+                onChange={(e) => handleFieldChange('bonus', e.target.value)}
                 placeholder="0"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                min="0"
               />
             </div>
             <div>
@@ -131,12 +137,12 @@ export function SalaryForm({ onSubmit, onClose, initialData }: SalaryFormProps) 
                 Potongan
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={formData.potongan}
-                onChange={(e) => setFormData({ ...formData, potongan: e.target.value })}
+                onChange={(e) => handleFieldChange('potongan', e.target.value)}
                 placeholder="0"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                min="0"
               />
             </div>
           </div>

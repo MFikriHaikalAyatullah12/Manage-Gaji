@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { FiX, FiSave, FiCalendar, FiDollarSign, FiFileText, FiTag } from 'react-icons/fi'
+import { formatCurrencyInput, parseCurrencyInput } from '@/utils/formatRupiah'
 
 interface Category {
   id: string
@@ -32,11 +33,16 @@ export function TransactionForm({
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     tanggal: initialData?.tanggal || new Date().toISOString().split('T')[0],
-    amount: initialData?.amount || '',
+    amount: initialData?.amount ? formatCurrencyInput(initialData.amount) : '',
     type: 'expense', // Always expense
     categoryId: initialData?.categoryId || '',
     note: initialData?.note || '',
   })
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCurrencyInput(e.target.value)
+    setFormData({ ...formData, amount: formatted })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,7 +50,7 @@ export function TransactionForm({
     try {
       await onSubmit({
         ...formData,
-        amount: Number(formData.amount),
+        amount: parseCurrencyInput(formData.amount),
       })
       onClose()
     } catch (error) {
@@ -91,13 +97,13 @@ export function TransactionForm({
                 Jumlah (Rp)
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                onChange={handleAmountChange}
                 placeholder="0"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
                 required
-                min="0"
               />
             </div>
           </div>

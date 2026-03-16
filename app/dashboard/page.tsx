@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { FiCalendar, FiRefreshCw } from 'react-icons/fi'
 import { StatCard, BalanceCard, DailyAverageCard } from '@/components/cards/StatCard'
 import { ExpensePieChart, TrendLineChart, IncomeExpenseBarChart } from '@/components/charts/Charts'
 import { getMonthName } from '@/utils/formatRupiah'
+import { useNotification } from '@/contexts/NotificationContext'
 
 interface DashboardData {
   totals: {
@@ -55,6 +56,21 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const { warning, info } = useNotification()
+  const hasShownWarning = useRef(false)
+  const hasShownWelcome = useRef(false)
+
+  // Welcome notification when user logs in
+  useEffect(() => {
+    if (session?.user?.name && !hasShownWelcome.current) {
+      // Small delay for better UX
+      const timer = setTimeout(() => {
+        info('Selamat Datang Kembali! 👋', `Halo ${session.user.name}, senang bertemu lagi!`)
+        hasShownWelcome.current = true
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [session, info])
 
   const fetchData = async () => {
     setLoading(true)
@@ -62,6 +78,25 @@ export default function DashboardPage() {
       const res = await fetch(`/api/dashboard?month=${selectedMonth}&year=${selectedYear}`)
       const result = await res.json()
       setData(result)
+      
+      // Show budget warning notification (only once per session)
+      if (result?.salaryComparison?.isOverBudget && !hasShownWarning.current) {
+        warning('Peringatan Keuangan!', 'Pengeluaran Anda bulan ini telah melebihi gaji pokok')
+        hasShownWarning.current = true
+      }
+      
+      // Check if any budget exceeded 80%
+      if (result?.budgetStatus) {
+        const nearLimitBudgets = result.budgetStatus.filter(
+          (b: any) => b.percentage >= 80 && b.percentage < 100
+        )
+        if (nearLimitBudgets.length > 0 && !hasShownWarning.current) {
+          warning(
+            'Anggaran Hampir Habis',
+            `${nearLimitBudgets[0].category.name} sudah mencapai ${nearLimitBudgets[0].percentage.toFixed(0)}%`
+          )
+        }
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
     } finally {

@@ -7,6 +7,23 @@ export function formatRupiah(amount: number): string {
   }).format(amount)
 }
 
+// Format angka dengan separator titik untuk input (1000000 -> 1.000.000)
+export function formatCurrencyInput(value: string | number): string {
+  // Hapus semua karakter non-digit
+  const numStr = String(value).replace(/\D/g, '')
+  if (!numStr) return ''
+  
+  // Format dengan titik sebagai thousand separator
+  return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+// Parse formatted currency ke number (1.000.000 -> 1000000)
+export function parseCurrencyInput(value: string): number {
+  if (!value) return 0
+  // Hapus semua titik dan parse ke number
+  return parseInt(value.replace(/\./g, ''), 10) || 0
+}
+
 export function formatRupiahShort(amount: number): string {
   if (amount >= 1000000000) {
     return `Rp ${(amount / 1000000000).toFixed(1)}M`

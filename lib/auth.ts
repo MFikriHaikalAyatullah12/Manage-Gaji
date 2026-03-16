@@ -43,6 +43,21 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
+    // Session akan expire setelah 24 jam atau ketika browser ditutup
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        // Tidak ada maxAge - cookie akan menjadi session cookie
+        // yang otomatis terhapus saat browser ditutup
+      },
+    },
   },
   pages: {
     signIn: '/login',

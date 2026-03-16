@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { FiX, FiSave, FiDollarSign, FiCalendar, FiTag } from 'react-icons/fi'
-import { getMonthName } from '@/utils/formatRupiah'
+import { getMonthName, formatCurrencyInput, parseCurrencyInput } from '@/utils/formatRupiah'
 
 interface Category {
   id: string
@@ -28,7 +28,7 @@ export function BudgetForm({ categories, onSubmit, onClose, initialData }: Budge
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     categoryId: initialData?.categoryId || '',
-    limitAmount: initialData?.limitAmount || '',
+    limitAmount: initialData?.limitAmount ? formatCurrencyInput(initialData.limitAmount) : '',
     month: initialData?.month || currentDate.getMonth() + 1,
     year: initialData?.year || currentDate.getFullYear(),
   })
@@ -38,13 +38,18 @@ export function BudgetForm({ categories, onSubmit, onClose, initialData }: Budge
     years.push(i)
   }
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCurrencyInput(e.target.value)
+    setFormData({ ...formData, limitAmount: formatted })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
       await onSubmit({
         ...formData,
-        limitAmount: Number(formData.limitAmount),
+        limitAmount: parseCurrencyInput(formData.limitAmount),
       })
       onClose()
     } catch (error) {
@@ -98,13 +103,13 @@ export function BudgetForm({ categories, onSubmit, onClose, initialData }: Budge
               Batas Anggaran (Rp)
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={formData.limitAmount}
-              onChange={(e) => setFormData({ ...formData, limitAmount: e.target.value })}
+              onChange={handleAmountChange}
               placeholder="0"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               required
-              min="0"
             />
           </div>
 

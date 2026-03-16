@@ -5,6 +5,7 @@ import { FiCalendar, FiDownload, FiFileText, FiChevronLeft, FiChevronRight } fro
 import { ExpensePieChart, IncomeExpenseBarChart } from '@/components/charts/Charts'
 import { formatRupiah, getMonthName } from '@/utils/formatRupiah'
 import { generateMonthlyReport } from '@/utils/generatePDF'
+import { useNotification } from '@/contexts/NotificationContext'
 
 interface Transaction {
   id: string
@@ -59,6 +60,7 @@ export default function LaporanPage() {
   const [downloading, setDownloading] = useState(false)
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const { success, error: showError } = useNotification()
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -91,9 +93,10 @@ export default function LaporanPage() {
     setDownloading(true)
     try {
       generateMonthlyReport(data, transactions, selectedMonth, selectedYear)
-    } catch (error) {
-      console.error('Error generating PDF:', error)
-      alert('Gagal membuat PDF. Silakan coba lagi.')
+      success('Berhasil!', `Laporan ${getMonthName(selectedMonth)} ${selectedYear} berhasil diunduh`)
+    } catch (err) {
+      console.error('Error generating PDF:', err)
+      showError('Gagal!', 'Terjadi kesalahan saat membuat PDF')
     } finally {
       setDownloading(false)
     }

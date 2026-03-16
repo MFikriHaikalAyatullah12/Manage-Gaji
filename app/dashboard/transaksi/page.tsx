@@ -5,6 +5,7 @@ import { FiPlus, FiSearch, FiFilter, FiCalendar, FiChevronLeft, FiChevronRight }
 import { TransactionTable, Transaction } from '@/components/tables/TransactionTable'
 import { TransactionForm } from '@/components/forms/TransactionForm'
 import { getMonthName, formatRupiah } from '@/utils/formatRupiah'
+import { useNotification } from '@/contexts/NotificationContext'
 
 interface Category {
   id: string
@@ -26,6 +27,7 @@ export default function TransaksiPage() {
   const [total, setTotal] = useState(0)
   const [totalAmount, setTotalAmount] = useState(0)
   const [page, setPage] = useState(1)
+  const { success, error: showError } = useNotification()
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true)
@@ -76,22 +78,33 @@ export default function TransaksiPage() {
   const handleSubmit = async (formData: any) => {
     try {
       if (editingTransaction) {
-        await fetch(`/api/transactions/${editingTransaction.id}`, {
+        const res = await fetch(`/api/transactions/${editingTransaction.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
         })
+        if (res.ok) {
+          success('Berhasil!', 'Pengeluaran berhasil diperbarui')
+        } else {
+          throw new Error('Failed to update')
+        }
       } else {
-        await fetch('/api/transactions', {
+        const res = await fetch('/api/transactions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
         })
+        if (res.ok) {
+          success('Berhasil!', 'Pengeluaran baru berhasil ditambahkan')
+        } else {
+          throw new Error('Failed to create')
+        }
       }
       fetchTransactions()
       setEditingTransaction(null)
-    } catch (error) {
-      console.error('Error saving transaction:', error)
+    } catch (err) {
+      console.error('Error saving transaction:', err)
+      showError('Gagal!', 'Terjadi kesalahan saat menyimpan pengeluaran')
     }
   }
 
@@ -103,10 +116,16 @@ export default function TransaksiPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Apakah Anda yakin ingin menghapus pengeluaran ini?')) return
     try {
-      await fetch(`/api/transactions/${id}`, { method: 'DELETE' })
-      fetchTransactions()
-    } catch (error) {
-      console.error('Error deleting transaction:', error)
+      const res = await fetch(`/api/transactions/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        success('Berhasil!', 'Pengeluaran berhasil dihapus')
+        fetchTransactions()
+      } else {
+        throw new Error('Failed to delete')
+      }
+    } catch (err) {
+      console.error('Error deleting transaction:', err)
+      showError('Gagal!', 'Terjadi kesalahan saat menghapus pengeluaran')
     }
   }
 

@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { FiUser, FiMail, FiLock, FiSave, FiEye, FiEyeOff } from 'react-icons/fi'
+import { FiUser, FiMail, FiLock, FiSave, FiEye, FiEyeOff, FiTrash2, FiAlertTriangle, FiX } from 'react-icons/fi'
 
 export default function PengaturanPage() {
   const { data: session, update } = useSession()
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
   const [showPassword, setShowPassword] = useState(false)
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [resetConfirmText, setResetConfirmText] = useState('')
+  const [resetting, setResetting] = useState(false)
 
   const [profileData, setProfileData] = useState({
     name: '',
@@ -94,6 +97,33 @@ export default function PengaturanPage() {
       setMessage({ type: 'error', text: 'Terjadi kesalahan' })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleResetData = async () => {
+    if (resetConfirmText !== 'HAPUS SEMUA') {
+      setMessage({ type: 'error', text: 'Ketik "HAPUS SEMUA" untuk konfirmasi!' })
+      return
+    }
+
+    setResetting(true)
+    try {
+      const res = await fetch('/api/user/reset-data', {
+        method: 'DELETE',
+      })
+
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'Semua data berhasil dihapus!' })
+        setShowResetModal(false)
+        setResetConfirmText('')
+      } else {
+        const data = await res.json()
+        setMessage({ type: 'error', text: data.message || 'Gagal menghapus data' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Terjadi kesalahan' })
+    } finally {
+      setResetting(false)
     }
   }
 
@@ -237,6 +267,100 @@ export default function PengaturanPage() {
           </button>
         </form>
       </div>
+
+      {/* Reset Data Section */}
+      <div className="bg-white rounded-2xl p-6 shadow-card mt-6 border-2 border-red-100">
+        <h2 className="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
+          <FiTrash2 />
+          Reset Data
+        </h2>
+
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+          <div className="flex items-start gap-3">
+            <FiAlertTriangle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
+            <div className="text-sm text-red-700">
+              <p className="font-medium mb-1">Peringatan!</p>
+              <p>
+                Fitur ini akan menghapus SEMUA data Anda secara permanen, termasuk:
+                transaksi, kategori, anggaran, dan gaji pokok. 
+                Data yang sudah dihapus tidak dapat dikembalikan.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowResetModal(true)}
+          className="w-full py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+        >
+          <FiTrash2 />
+          Hapus Semua Data
+        </button>
+      </div>
+
+      {/* Reset Data Confirmation Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full animate-fadeIn">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-red-600 flex items-center gap-2">
+                <FiAlertTriangle />
+                Konfirmasi Hapus Data
+              </h3>
+              <button
+                onClick={() => {
+                  setShowResetModal(false)
+                  setResetConfirmText('')
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+              <p className="text-sm text-red-700">
+                Anda akan menghapus <strong>SEMUA DATA</strong> secara permanen.
+                Tindakan ini tidak dapat dibatalkan!
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ketik <span className="font-bold text-red-600">HAPUS SEMUA</span> untuk konfirmasi:
+              </label>
+              <input
+                type="text"
+                value={resetConfirmText}
+                onChange={(e) => setResetConfirmText(e.target.value)}
+                placeholder="HAPUS SEMUA"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowResetModal(false)
+                  setResetConfirmText('')
+                }}
+                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleResetData}
+                disabled={resetting || resetConfirmText !== 'HAPUS SEMUA'}
+                className="flex-1 py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <FiTrash2 />
+                {resetting ? 'Menghapus...' : 'Hapus Semua'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

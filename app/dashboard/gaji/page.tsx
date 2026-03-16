@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { FiEdit2, FiDollarSign, FiGift, FiMinus } from 'react-icons/fi'
 import { SalaryForm } from '@/components/forms/SalaryForm'
 import { formatRupiah } from '@/utils/formatRupiah'
+import { useNotification } from '@/contexts/NotificationContext'
 
 interface Salary {
   id: string
@@ -18,6 +19,7 @@ export default function GajiPage() {
   const [salary, setSalary] = useState<Salary | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const { success, error: showError } = useNotification()
 
   const fetchSalary = async () => {
     setLoading(true)
@@ -38,7 +40,6 @@ export default function GajiPage() {
   }, [])
 
   const handleSubmit = async (formData: any) => {
-    console.log('handleSubmit - Start, data:', formData)
     try {
       const res = await fetch('/api/salary', {
         method: 'POST',
@@ -46,21 +47,17 @@ export default function GajiPage() {
         body: JSON.stringify(formData),
       })
       
-      console.log('handleSubmit - Response status:', res.status)
-      
       if (!res.ok) {
         const errorData = await res.json()
         throw new Error(errorData.message || 'Gagal menyimpan gaji')
       }
       
-      const savedData = await res.json()
-      console.log('handleSubmit - Saved data:', savedData)
-      
       await fetchSalary()
-      console.log('handleSubmit - fetchSalary completed')
-    } catch (error) {
-      console.error('Error saving salary:', error)
-      throw error // Re-throw so the form can catch it
+      success('Berhasil!', 'Data gaji berhasil disimpan')
+    } catch (err) {
+      console.error('Error saving salary:', err)
+      showError('Gagal!', 'Terjadi kesalahan saat menyimpan gaji')
+      throw err
     }
   }
 
