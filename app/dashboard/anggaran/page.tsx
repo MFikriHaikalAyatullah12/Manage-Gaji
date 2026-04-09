@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { FiPlus, FiCalendar, FiTrash2, FiTarget } from 'react-icons/fi'
+import { FiPlus, FiCalendar, FiTrash2, FiTarget, FiCopy } from 'react-icons/fi'
 import { BudgetForm } from '@/components/forms/BudgetForm'
 import { formatRupiah, getMonthName } from '@/utils/formatRupiah'
 
@@ -29,6 +29,7 @@ export default function AnggaranPage() {
   const [budgets, setBudgets] = useState<BudgetStatus[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const [copying, setCopying] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -87,6 +88,45 @@ export default function AnggaranPage() {
     }
   }
 
+  const handleCopyToNextMonth = async () => {
+    // Calculate next month info for confirmation message
+    let nextMonth = selectedMonth + 1
+    let nextYear = selectedYear
+    if (nextMonth > 12) {
+      nextMonth = 1
+      nextYear = selectedYear + 1
+    }
+
+    if (!confirm(`Salin semua anggaran dari ${getMonthName(selectedMonth)} ${selectedYear} ke ${getMonthName(nextMonth)} ${nextYear}?`)) return
+    
+    setCopying(true)
+    try {
+      const res = await fetch('/api/budgets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'copy-to-next-month',
+          fromMonth: selectedMonth,
+          fromYear: selectedYear,
+        }),
+      })
+      const result = await res.json()
+      
+      if (result.copied > 0) {
+        alert(`Berhasil menyalin ${result.copied} anggaran ke ${getMonthName(result.toMonth)} ${result.toYear}${result.skipped > 0 ? ` (${result.skipped} sudah ada)` : ''}`)
+      } else if (result.skipped > 0) {
+        alert(`Semua anggaran sudah ada di ${getMonthName(result.toMonth)} ${result.toYear}`)
+      } else {
+        alert('Tidak ada anggaran untuk disalin')
+      }
+    } catch (error) {
+      console.error('Error copying budgets:', error)
+      alert('Gagal menyalin anggaran')
+    } finally {
+      setCopying(false)
+    }
+  }
+
   const years = []
   for (let i = new Date().getFullYear() - 1; i <= new Date().getFullYear() + 1; i++) {
     years.push(i)
@@ -130,6 +170,20 @@ export default function AnggaranPage() {
               ))}
             </select>
           </div>
+          <button
+            onClick={handleCopyToNextMonth}
+            disabled={copying || budgets.length === 0}
+            className="flex items-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Salin anggaran ke bulan berikutnya"
+          >
+            {copying ? (
+              <div className="spinner-sm"></div>
+            ) : (
+              <FiCopy />
+            )}
+            <span className="hidden sm:inline">Salin ke Bulan Berikutnya</span>
+            <span className="sm:hidden">Salin</span>
+          </button>
           <button
             onClick={() => setShowForm(true)}
             className="flex items-center gap-2 px-4 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/30"

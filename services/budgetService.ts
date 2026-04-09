@@ -94,3 +94,64 @@ export async function getBudgetStatus(userId: string, month: number, year: numbe
 
   return results
 }
+
+export async function copyBudgetsToNextMonth(userId: string, fromMonth: number, fromYear: number) {
+  // Calculate next month and year
+  let toMonth = fromMonth + 1
+  let toYear = fromYear
+  if (toMonth > 12) {
+    toMonth = 1
+    toYear = fromYear + 1
+  }
+
+  // Get all budgets from the source month
+  const sourceBudgets = await prisma.budget.findMany({
+    where: {
+      userId,
+      month: fromMonth,
+      year: fromYear,
+    },
+    include: { category: true },
+  })
+
+  if (sourceBudgets.length === 0) {
+    return { copied: 0, skipped: 0, toMonth, toYear }
+  }
+
+  let copied = 0
+  let skipped = 0
+
+  // Copy each budget to the next month
+  for (const budget of sourceBudgets) {
+    // Check if budget already exists for the target month
+    const existing = await prisma.budget.findUnique({
+      where: {
+        userId_categoryId_month_year: {
+          userId,
+          categoryId: budget.categoryId,
+          month: toMonth,
+          year: toYear,
+        },
+      },
+    })
+
+    if (existing) {
+      skipped++
+      continue
+    }
+
+    // Create new budget for the next month
+    await prisma.budget.create({
+      data: {
+        userId,
+        categoryId: budget.categoryId,
+        limitAmount: budget.limitAmount,
+        month: toMonth,
+        year: toYear,
+      },
+    })
+    copied++
+  }
+
+  return { copied, skipped, toMonth, toYear }
+}

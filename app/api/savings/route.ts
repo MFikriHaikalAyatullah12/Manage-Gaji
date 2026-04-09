@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import {
-  createOrUpdateBudget,
-  getBudgetsByMonthYear,
-  getBudgetStatus,
-  copyBudgetsToNextMonth,
-} from '@/services/budgetService'
+  createOrUpdateSaving,
+  getSavingsOverview,
+  getAllSavings,
+  getTotalSavings,
+} from '@/services/savingsService'
 
 export async function GET(request: Request) {
   try {
@@ -23,17 +23,23 @@ export async function GET(request: Request) {
     const m = parseInt(month || String(new Date().getMonth() + 1))
     const y = parseInt(year || String(new Date().getFullYear()))
 
-    // Get budget status with spent amounts
-    if (action === 'status') {
-      const status = await getBudgetStatus(session.user.id, m, y)
-      return NextResponse.json(status)
+    // Get savings overview
+    if (action === 'overview') {
+      const overview = await getSavingsOverview(session.user.id, m, y)
+      return NextResponse.json(overview)
     }
 
-    // Get budgets for month/year
-    const budgets = await getBudgetsByMonthYear(session.user.id, m, y)
-    return NextResponse.json(budgets)
+    // Get total savings
+    if (action === 'total') {
+      const total = await getTotalSavings(session.user.id)
+      return NextResponse.json({ total })
+    }
+
+    // Get all savings
+    const savings = await getAllSavings(session.user.id)
+    return NextResponse.json(savings)
   } catch (error) {
-    console.error('Error fetching budgets:', error)
+    console.error('Error fetching savings:', error)
     return NextResponse.json(
       { message: 'Terjadi kesalahan server' },
       { status: 500 }
@@ -49,28 +55,17 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json()
-
-    // Handle copy to next month action
-    if (data.action === 'copy-to-next-month') {
-      const result = await copyBudgetsToNextMonth(
-        session.user.id,
-        data.fromMonth,
-        data.fromYear
-      )
-      return NextResponse.json(result)
-    }
-
-    const budget = await createOrUpdateBudget({
+    const saving = await createOrUpdateSaving({
       userId: session.user.id,
-      categoryId: data.categoryId,
-      limitAmount: data.limitAmount,
+      amount: data.amount,
       month: data.month,
       year: data.year,
+      note: data.note,
     })
 
-    return NextResponse.json(budget, { status: 201 })
+    return NextResponse.json(saving, { status: 201 })
   } catch (error) {
-    console.error('Error creating budget:', error)
+    console.error('Error creating saving:', error)
     return NextResponse.json(
       { message: 'Terjadi kesalahan server' },
       { status: 500 }

@@ -15,6 +15,7 @@ import {
   FiMenu,
   FiX,
   FiTrendingDown,
+  FiSave,
 } from 'react-icons/fi'
 import { useState } from 'react'
 
@@ -22,6 +23,7 @@ const menuItems = [
   { name: 'Dashboard', href: '/dashboard', icon: FiHome },
   { name: 'Pengeluaran', href: '/dashboard/transaksi', icon: FiTrendingDown },
   { name: 'Gaji Pokok', href: '/dashboard/gaji', icon: FiDollarSign },
+  { name: 'Tabungan', href: '/dashboard/tabungan', icon: FiSave },
   { name: 'Kategori', href: '/dashboard/kategori', icon: FiFolder },
   { name: 'Anggaran Bulanan', href: '/dashboard/anggaran', icon: FiTarget },
   { name: 'Laporan Keuangan', href: '/dashboard/laporan', icon: FiFileText },
