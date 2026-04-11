@@ -8,7 +8,7 @@ import { formatRupiah, getMonthName } from '@/utils/formatRupiah'
 interface Category {
   id: string
   name: string
-  icon: string | null
+  color: string | null
 }
 
 interface BudgetStatus {
@@ -236,9 +236,10 @@ export default function AnggaranPage() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-xl">
-                    {budget.category.icon || '📦'}
-                  </div>
+                  <div 
+                    className="w-10 h-10 rounded-lg"
+                    style={{ backgroundColor: budget.category.color || '#6b7280' }}
+                  />
                   <div>
                     <p className="font-medium text-gray-800">{budget.category.name}</p>
                     <p className="text-sm text-gray-500">

@@ -39,7 +39,6 @@ interface Transaction {
   category: {
     id: string
     name: string
-    icon: string | null
     color: string | null
   } | null
 }
@@ -60,12 +59,18 @@ const getMonthName = (month: number): string => {
   return months[month - 1] || ''
 }
 
+interface SavingsInfo {
+  monthlySaving: number
+  totalSavings: number
+}
+
 export function generateMonthlyReport(
   data: ReportData,
   transactions: Transaction[],
   month: number,
   year: number,
-  userName?: string
+  userName?: string,
+  savingsInfo?: SavingsInfo
 ) {
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
@@ -96,6 +101,8 @@ export function generateMonthlyReport(
     ['Gaji Pokok', formatRupiah(data.salaryComparison.salaryAmount)],
     ['Total Pengeluaran', formatRupiah(data.totals.expense)],
     ['Selisih (Gaji - Pengeluaran)', formatRupiah(data.salaryComparison.selisih)],
+    ['Tabungan Bulan Ini', formatRupiah(savingsInfo?.monthlySaving || 0)],
+    ['Total Tabungan Terkumpul', formatRupiah(savingsInfo?.totalSavings || 0)],
     ['Rata-rata Pengeluaran/Hari', formatRupiah(data.dailyStats.dailyAverage)],
     ['Proyeksi Bulanan', formatRupiah(data.dailyStats.projectedMonthly)],
   ]

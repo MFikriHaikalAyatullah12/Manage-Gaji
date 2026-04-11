@@ -6,12 +6,9 @@ import { FiPlus, FiEdit2, FiTrash2, FiX, FiSave, FiTag } from 'react-icons/fi'
 interface Category {
   id: string
   name: string
-  icon: string | null
   color: string | null
-  isDefault: boolean
 }
 
-const emojiOptions = ['🍔', '🚗', '📄', '🛒', '🎬', '💊', '📚', '💰', '🎁', '📈', '📦', '🏠', '✈️', '👕', '💼', '🎮', '☕', '🎵']
 const colorOptions = ['#f97316', '#3b82f6', '#ef4444', '#8b5cf6', '#ec4899', '#22c55e', '#06b6d4', '#f59e0b', '#10b981', '#6b7280']
 
 export default function KategoriPage() {
@@ -21,7 +18,6 @@ export default function KategoriPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [formData, setFormData] = useState({
     name: '',
-    icon: '📦',
     color: '#6b7280',
   })
 
@@ -61,7 +57,7 @@ export default function KategoriPage() {
       fetchCategories()
       setShowForm(false)
       setEditingCategory(null)
-      setFormData({ name: '', icon: '📦', color: '#6b7280' })
+      setFormData({ name: '', color: '#6b7280' })
     } catch (error) {
       console.error('Error saving category:', error)
     }
@@ -71,7 +67,6 @@ export default function KategoriPage() {
     setEditingCategory(category)
     setFormData({
       name: category.name,
-      icon: category.icon || '📦',
       color: category.color || '#6b7280',
     })
     setShowForm(true)
@@ -103,7 +98,7 @@ export default function KategoriPage() {
         <button
           onClick={() => {
             setEditingCategory(null)
-            setFormData({ name: '', icon: '📦', color: '#6b7280' })
+            setFormData({ name: '', color: '#6b7280' })
             setShowForm(true)
           }}
           className="flex items-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30"
@@ -126,36 +121,21 @@ export default function KategoriPage() {
               className="bg-white rounded-2xl p-4 shadow-card hover:shadow-card-hover transition-shadow"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                    style={{ backgroundColor: category.color + '20' }}
+                <p className="font-medium text-gray-800">{category.name}</p>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleEdit(category)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                   >
-                    {category.icon}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800">{category.name}</p>
-                    <p className="text-xs text-gray-400">
-                      {category.isDefault ? 'Default' : 'Kustom'}
-                    </p>
-                  </div>
+                    <FiEdit2 size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(category.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <FiTrash2 size={16} />
+                  </button>
                 </div>
-                {!category.isDefault && (
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleEdit(category)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                      <FiEdit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(category.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           ))}
@@ -196,29 +176,6 @@ export default function KategoriPage() {
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   required
                 />
-              </div>
-
-              {/* Icon */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ikon
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {emojiOptions.map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, icon: emoji })}
-                      className={`w-10 h-10 rounded-lg text-xl flex items-center justify-center transition-all ${
-                        formData.icon === emoji
-                          ? 'bg-blue-100 ring-2 ring-blue-500'
-                          : 'bg-gray-100 hover:bg-gray-200'
-                      }`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               {/* Color */}

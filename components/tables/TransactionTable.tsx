@@ -12,7 +12,6 @@ export interface Transaction {
   category?: {
     id: string
     name: string
-    icon?: string | null
     color?: string | null
   } | null
 }
@@ -40,13 +39,11 @@ export function TransactionTable({ transactions, onEdit, onDelete }: Transaction
           key={transaction.id} 
           className="bg-white rounded-xl p-3 shadow-card flex items-center gap-3"
         >
-          {/* Icon */}
+          {/* Color indicator */}
           <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
-            style={{ backgroundColor: (transaction.category?.color || '#6b7280') + '20' }}
-          >
-            {transaction.category?.icon || '📦'}
-          </div>
+            className="w-10 h-10 rounded-lg flex-shrink-0"
+            style={{ backgroundColor: transaction.category?.color || '#6b7280' }}
+          />
           
           {/* Content */}
           <div className="flex-1 min-w-0">

@@ -162,22 +162,16 @@ export function TrendLineChart({ data }: TrendLineChartProps) {
   )
 }
 
-interface IncomeExpenseBarChartProps {
+interface ExpenseBarChartProps {
   data: MonthlyTrend[]
 }
 
-export function IncomeExpenseBarChart({ data }: IncomeExpenseBarChartProps) {
+export function ExpenseBarChart({ data }: ExpenseBarChartProps) {
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
 
   const chartData = {
     labels: data.map((item) => monthNames[item.month - 1]),
     datasets: [
-      {
-        label: 'Pemasukan',
-        data: data.map((item) => item.income),
-        backgroundColor: '#22c55e',
-        borderRadius: 8,
-      },
       {
         label: 'Pengeluaran',
         data: data.map((item) => item.expense),
@@ -223,7 +217,7 @@ export function IncomeExpenseBarChart({ data }: IncomeExpenseBarChartProps) {
 
   return (
     <div className="bg-white rounded-xl p-4 sm:p-6 shadow-card">
-      <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3">Pemasukan vs Pengeluaran</h3>
+      <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3">Tren Pengeluaran</h3>
       <div className="h-48 sm:h-64">
         <Bar data={chartData} options={options} />
       </div>

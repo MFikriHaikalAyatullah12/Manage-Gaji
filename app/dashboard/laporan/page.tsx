@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { FiCalendar, FiDownload, FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
-import { ExpensePieChart, IncomeExpenseBarChart } from '@/components/charts/Charts'
+import { ExpensePieChart, ExpenseBarChart } from '@/components/charts/Charts'
 import { formatRupiah, getMonthName } from '@/utils/formatRupiah'
 import { generateMonthlyReport } from '@/utils/generatePDF'
 import { useNotification } from '@/contexts/NotificationContext'
@@ -16,7 +16,6 @@ interface Transaction {
   category: {
     id: string
     name: string
-    icon: string | null
     color: string | null
   } | null
 }
@@ -53,9 +52,19 @@ interface ReportData {
   }
 }
 
+interface SavingsData {
+  id: string
+  amount: number
+  month: number
+  year: number
+  note: string | null
+}
+
 export default function LaporanPage() {
   const [data, setData] = useState<ReportData | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [savings, setSavings] = useState<SavingsData | null>(null)
+  const [totalSavings, setTotalSavings] = useState(0)
   const [loading, setLoading] = useState(true)
   const [downloading, setDownloading] = useState(false)
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
@@ -65,17 +74,28 @@ export default function LaporanPage() {
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      // Fetch report data and transactions in parallel
-      const [reportRes, transRes] = await Promise.all([
+      // Fetch report data, transactions, and savings in parallel
+      const [reportRes, transRes, savingsRes, totalSavingsRes] = await Promise.all([
         fetch(`/api/dashboard?month=${selectedMonth}&year=${selectedYear}`),
-        fetch(`/api/transactions?month=${selectedMonth}&year=${selectedYear}&type=expense&limit=1000`)
+        fetch(`/api/transactions?month=${selectedMonth}&year=${selectedYear}&type=expense&limit=1000`),
+        fetch(`/api/savings?month=${selectedMonth}&year=${selectedYear}`),
+        fetch(`/api/savings?action=total`)
       ])
       
       const reportData = await reportRes.json()
       const transData = await transRes.json()
+      const savingsData = await savingsRes.json()
+      const totalSavingsData = await totalSavingsRes.json()
       
       setData(reportData)
       setTransactions(transData.transactions || [])
+      
+      // Find savings for selected month
+      const monthlySaving = Array.isArray(savingsData) 
+        ? savingsData.find((s: SavingsData) => s.month === selectedMonth && s.year === selectedYear)
+        : null
+      setSavings(monthlySaving || null)
+      setTotalSavings(totalSavingsData.total || 0)
     } catch (error) {
       console.error('Error fetching report data:', error)
     } finally {
@@ -92,7 +112,14 @@ export default function LaporanPage() {
     
     setDownloading(true)
     try {
-      generateMonthlyReport(data, transactions, selectedMonth, selectedYear)
+      generateMonthlyReport(
+        data, 
+        transactions, 
+        selectedMonth, 
+        selectedYear, 
+        undefined,
+        { monthlySaving: savings?.amount || 0, totalSavings }
+      )
       success('Berhasil!', `Laporan ${getMonthName(selectedMonth)} ${selectedYear} berhasil diunduh`)
     } catch (err) {
       console.error('Error generating PDF:', err)
@@ -271,7 +298,7 @@ export default function LaporanPage() {
 
       {/* Monthly Trend Chart */}
       <div className="mb-6">
-        <IncomeExpenseBarChart data={data?.monthlyTrend || []} />
+        <ExpenseBarChart data={data?.monthlyTrend || []} />
       </div>
 
       {/* Category Breakdown */}

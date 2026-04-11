@@ -139,52 +139,46 @@ export default function GajiPage() {
               </div>
 
               {/* Tunjangan */}
-              {salary.tunjangan && salary.tunjangan > 0 && (
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <FiGift className="text-green-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800">Tunjangan</p>
-                      <p className="text-xs text-gray-400">Tunjangan tetap</p>
-                    </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <FiGift className="text-green-600" />
                   </div>
-                  <span className="font-semibold text-green-600">+ {formatRupiah(salary.tunjangan)}</span>
+                  <div>
+                    <p className="font-medium text-gray-800">Tunjangan</p>
+                    <p className="text-xs text-gray-400">Tunjangan tetap</p>
+                  </div>
                 </div>
-              )}
+                <span className="font-semibold text-green-600">+ {formatRupiah(salary.tunjangan || 0)}</span>
+              </div>
 
               {/* Bonus */}
-              {salary.bonus && salary.bonus > 0 && (
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <FiGift className="text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800">Bonus</p>
-                      <p className="text-xs text-gray-400">Bonus tambahan</p>
-                    </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <FiGift className="text-blue-600" />
                   </div>
-                  <span className="font-semibold text-blue-600">+ {formatRupiah(salary.bonus)}</span>
+                  <div>
+                    <p className="font-medium text-gray-800">Bonus</p>
+                    <p className="text-xs text-gray-400">Bonus tambahan</p>
+                  </div>
                 </div>
-              )}
+                <span className="font-semibold text-blue-600">+ {formatRupiah(salary.bonus || 0)}</span>
+              </div>
 
               {/* Potongan */}
-              {salary.potongan && salary.potongan > 0 && (
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                      <FiMinus className="text-red-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800">Potongan</p>
-                      <p className="text-xs text-gray-400">Pajak, BPJS, dll</p>
-                    </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                    <FiMinus className="text-red-600" />
                   </div>
-                  <span className="font-semibold text-red-600">- {formatRupiah(salary.potongan)}</span>
+                  <div>
+                    <p className="font-medium text-gray-800">Potongan</p>
+                    <p className="text-xs text-gray-400">Pajak, BPJS, dll</p>
+                  </div>
                 </div>
-              )}
+                <span className="font-semibold text-red-600">- {formatRupiah(salary.potongan || 0)}</span>
+              </div>
 
               {/* Total */}
               <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl border-2 border-purple-200">

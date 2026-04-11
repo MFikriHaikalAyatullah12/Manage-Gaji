@@ -7,7 +7,7 @@ import { getMonthName, formatCurrencyInput, parseCurrencyInput } from '@/utils/f
 interface Category {
   id: string
   name: string
-  icon?: string | null
+  color?: string | null
 }
 
 interface BudgetFormProps {
@@ -90,7 +90,7 @@ export function BudgetForm({ categories, onSubmit, onClose, initialData }: Budge
               <option value="">Pilih Kategori</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
-                  {cat.icon} {cat.name}
+                  {cat.name}
                 </option>
               ))}
             </select>

@@ -7,7 +7,6 @@ import { formatCurrencyInput, parseCurrencyInput } from '@/utils/formatRupiah'
 interface Category {
   id: string
   name: string
-  icon?: string | null
   color?: string | null
 }
 
@@ -123,7 +122,7 @@ export function TransactionForm({
               <option value="">Pilih Kategori</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
-                  {cat.icon} {cat.name}
+                  {cat.name}
                 </option>
               ))}
             </select>

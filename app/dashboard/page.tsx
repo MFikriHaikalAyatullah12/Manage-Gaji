@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { FiCalendar, FiRefreshCw } from 'react-icons/fi'
 import { StatCard, BalanceCard, DailyAverageCard } from '@/components/cards/StatCard'
-import { ExpensePieChart, TrendLineChart, IncomeExpenseBarChart } from '@/components/charts/Charts'
+import { ExpensePieChart, TrendLineChart, ExpenseBarChart } from '@/components/charts/Charts'
 import { getMonthName } from '@/utils/formatRupiah'
 import { useNotification } from '@/contexts/NotificationContext'
 
@@ -171,7 +171,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Warning Banner */}
-      {data?.salaryComparison.isOverBudget && (
+      {data?.salaryComparison?.isOverBudget && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
           <div className="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-lg">⚠️</span>
@@ -186,13 +186,7 @@ export default function DashboardPage() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <StatCard
-          title="Pemasukan"
-          amount={data?.totals.income || 0}
-          type="income"
-          subtitle={`${getMonthName(selectedMonth)}`}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <StatCard
           title="Pengeluaran"
           amount={data?.totals.expense || 0}
@@ -201,16 +195,16 @@ export default function DashboardPage() {
         />
         <StatCard
           title="Gaji Pokok"
-          amount={data?.salaryComparison.salaryAmount || 0}
+          amount={data?.salaryComparison?.salaryAmount || 0}
           type="salary"
           subtitle="Bulan ini"
         />
         <StatCard
           title="Saldo"
-          amount={data?.salaryComparison.selisih || 0}
+          amount={data?.salaryComparison?.selisih || 0}
           type="balance"
-          warning={data?.salaryComparison.isOverBudget}
-          subtitle={data?.salaryComparison.selisih && data.salaryComparison.selisih < 0 ? 'Defisit' : 'Surplus'}
+          warning={data?.salaryComparison?.isOverBudget}
+          subtitle={data?.salaryComparison?.selisih && data.salaryComparison.selisih < 0 ? 'Defisit' : 'Surplus'}
         />
       </div>
 
@@ -263,7 +257,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="mb-6">
-        <IncomeExpenseBarChart data={data?.monthlyTrend || []} />
+        <ExpenseBarChart data={data?.monthlyTrend || []} />
       </div>
     </div>
   )

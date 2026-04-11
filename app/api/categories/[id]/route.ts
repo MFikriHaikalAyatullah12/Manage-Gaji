@@ -22,7 +22,7 @@ export async function PUT(
     }
 
     // Only allow editing user's own categories
-    if (!existing.isDefault && existing.userId !== session.user.id) {
+    if (existing.userId !== session.user.id) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
     }
 
@@ -31,7 +31,6 @@ export async function PUT(
       where: { id: params.id },
       data: {
         name: data.name,
-        icon: data.icon,
         color: data.color,
       },
     })
@@ -64,12 +63,9 @@ export async function DELETE(
       return NextResponse.json({ message: 'Not found' }, { status: 404 })
     }
 
-    // Only allow deleting user's own categories, not default ones
-    if (existing.isDefault || existing.userId !== session.user.id) {
-      return NextResponse.json(
-        { message: 'Kategori default tidak dapat dihapus' },
-        { status: 403 }
-      )
+    // Only allow deleting user's own categories
+    if (existing.userId !== session.user.id) {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
     }
 
     await prisma.category.delete({
